@@ -131,52 +131,122 @@ def show_game_over(stdscr, score: int):
     
     stdscr.refresh()
 
-def show_welcome_screen(stdscr):
-    """Display welcome screen with retro ASCII art"""
+def show_splash_screen(stdscr):
+    """Display splash/welcome screen with retro styling and blinking prompt"""
     stdscr.clear()
     
-    # Snake ASCII art
-    snake_art = [
-        "  ██████  ███    ██  █████  ██   ██ ███████ ",
-        " ██       ████   ██ ██   ██ ██  ██  ██      ",
-        " ██████   ██ ██  ██ ███████ █████   █████   ",
-        "      ██  ██  ██ ██ ██   ██ ██  ██  ██      ",
-        " ██████   ██   ████ ██   ██ ██   ██ ███████ "
+    # Retro-style title with block characters
+    retro_title = [
+        "██████╗ ███████╗████████╗██████╗  ██████╗ ",
+        "██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗",
+        "██████╔╝█████╗     ██║   ██████╔╝██║   ██║",
+        "██╔══██╗██╔══╝     ██║   ██╔══██╗██║   ██║",
+        "██║  ██║███████╗   ██║   ██║  ██║╚██████╔╝",
+        "╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ",
+        "",
+        "   ███████╗███╗   ██╗ █████╗ ██╗  ██╗███████╗",
+        "   ██╔════╝████╗  ██║██╔══██╗██║ ██╔╝██╔════╝",
+        "   ███████╗██╔██╗ ██║███████║█████╔╝ █████╗  ",
+        "   ╚════██║██║╚██╗██║██╔══██║██╔═██╗ ██╔══╝  ",
+        "   ███████║██║ ╚████║██║  ██║██║  ██╗███████╗",
+        "   ╚══════╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝"
     ]
     
     height, width = stdscr.getmaxyx()
-    start_y = height // 2 - len(snake_art) // 2 - 3
+    start_y = max(2, height // 2 - len(retro_title) // 2 - 8)
     
-    for i, line in enumerate(snake_art):
+    # Draw retro title
+    for i, line in enumerate(retro_title):
         x = max(0, (width - len(line)) // 2)
         try:
             stdscr.addstr(start_y + i, x, line)
         except curses.error:
             pass
     
-    # Instructions
-    instructions = [
-        "🐍 RETRO SNAKE GAME 🐍",
+    # Game info with retro styling
+    game_info = [
         "",
-        "Controls:",
-        "↑ ↓ ← → : Move snake",
-        "q : Quit game",
-        "",
-        "Eat the diamonds (♦) to grow and score points!",
-        "Don't hit the walls or yourself!",
-        "",
-        "Press any key to start..."
+        "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓",
+        "▓                                             ▓",
+        "▓  🎮 CLASSIC ARCADE EXPERIENCE 🎮            ▓",
+        "▓                                             ▓",
+        "▓  CONTROLS:                                  ▓",
+        "▓  ↑ ↓ ← → : Navigate your snake              ▓",
+        "▓  Q : Quit game                              ▓",
+        "▓                                             ▓",
+        "▓  OBJECTIVE:                                 ▓",
+        "▓  • Eat diamonds (♦) to grow                 ▓",
+        "▓  • Avoid walls (█) and yourself             ▓",
+        "▓  • Achieve the highest score!               ▓",
+        "▓                                             ▓",
+        "▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓"
     ]
     
-    for i, line in enumerate(instructions):
+    # Draw game info
+    info_start_y = start_y + len(retro_title) + 2
+    for i, line in enumerate(game_info):
         x = max(0, (width - len(line)) // 2)
         try:
-            stdscr.addstr(start_y + len(snake_art) + 2 + i, x, line)
+            stdscr.addstr(info_start_y + i, x, line)
+        except curses.error:
+            pass
+    
+    # Blinking prompt setup
+    blink_counter = 0
+    show_prompt = True
+    
+    # Static instructions
+    static_instructions = [
+        "",
+        "Press 'Q' to quit"
+    ]
+    
+    prompt_y = info_start_y + len(game_info) + 2
+    
+    # Draw static instructions
+    for i, line in enumerate(static_instructions):
+        x = max(0, (width - len(line)) // 2)
+        try:
+            stdscr.addstr(prompt_y + 2 + i, x, line)
         except curses.error:
             pass
     
     stdscr.refresh()
-    stdscr.getch()  # Wait for key press
+    
+    # Main loop with blinking prompt
+    while True:
+        # Handle blinking effect (soft blink every ~30 frames)
+        blink_counter += 1
+        if blink_counter >= 30:
+            show_prompt = not show_prompt
+            blink_counter = 0
+        
+        # Draw or clear the blinking prompt
+        prompt_text = ">>> Press 'S' to START! <<<"
+        x = max(0, (width - len(prompt_text)) // 2)
+        
+        try:
+            if show_prompt:
+                # Show prompt with retro styling
+                stdscr.addstr(prompt_y, x, "▓" * len(prompt_text))
+                stdscr.addstr(prompt_y + 1, x, prompt_text)
+            else:
+                # Clear prompt area
+                stdscr.addstr(prompt_y, x, " " * len(prompt_text))
+                stdscr.addstr(prompt_y + 1, x, " " * len(prompt_text))
+        except curses.error:
+            pass
+        
+        stdscr.refresh()
+        
+        # Check for key input
+        key = stdscr.getch()
+        if key == ord('s') or key == ord('S'):
+            return True  # Start game
+        elif key == ord('q') or key == ord('Q'):
+            return False  # Quit game
+        
+        time.sleep(0.05)  # Control blink speed and reduce CPU usage
 
 def main(stdscr):
     """Main game loop"""
@@ -185,8 +255,9 @@ def main(stdscr):
     stdscr.nodelay(1)   # Non-blocking input
     stdscr.timeout(100) # Refresh rate
     
-    # Show welcome screen
-    show_welcome_screen(stdscr)
+    # Show splash screen - exit if user chooses to quit
+    if not show_splash_screen(stdscr):
+        return
     
     while True:
         # Initialize game
